@@ -33,11 +33,23 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
-  const newUser = await User.create(req.body);
-  url = `${req.protocol}://${req.get("host")}/me`;
-  console.log(url);
-  await new Email(newUser, url).sendWelcome();
-  createSendToken(newUser, 201, res);
+  const { email, password, passwordConfirm } = req.body;
+  if (!email || !password || !passwordConfirm) {
+    return next(new AppError("Please provide all information.", 400));
+  }
+  if (password !== passwordConfirm) {
+    return next(
+      new AppError("Password and password confirm should be same.", 400)
+    );
+  }
+  const existinguser = await User.findOne({ email });
+  if (!existinguser) {
+    const newUser = await User.create(req.body);
+    url = `${req.protocol}://${req.get("host")}/me`;
+    console.log(url);
+    await new Email(newUser, url).sendWelcome();
+    createSendToken(newUser, 201, res);
+  } else next(new AppError("Email already exists.", 400));
 });
 
 exports.login = catchAsync(async (req, res, next) => {
