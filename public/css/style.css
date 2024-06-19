@@ -1324,3 +1324,51 @@ body {
   -webkit-transform: translateY(-2px);
   transform: translateY(-2px);
 }
+.review-tour {
+  height: 130px;
+  min-width: 200px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1.2rem;
+  color: #333;
+  box-sizing: border-box;
+  resize: vertical;
+  margin-bottom: 15px;
+}
+.review-details {
+  position: relative;
+}
+.rating {
+  position: absolute;
+  bottom: -20px;
+  left: 65px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+}
+.ratings-num {
+  font-size: 1.2rem;
+  margin-left: 4px;
+}
+.form__label-rate {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.rating-input {
+  width: 100px;
+}
+.review__options {
+  display: flex;
+  flex-direction: row;
+  margin: 15px 5px 0 5px;
+  gap: 30px;
+}
+.review--text {
+  border-radius: 4px;
+  margin: 8px 5px;
+  width: 200px;
+  height: 100px;
+  padding: 10px;
+}

@@ -12,10 +12,16 @@ Router.get(
   viewController.getOverview
 );
 Router.get("/tour/:slug", authController.isloggedIn, viewController.getTour);
+Router.get(
+  "/tour/booked/:slug",
+  authController.isloggedIn,
+  viewController.getBookedTour
+);
 Router.get("/login", authController.isloggedIn, viewController.getLoginForm);
 Router.get("/signup", authController.isloggedIn, viewController.getSignupForm);
 Router.get("/me", authController.protect, viewController.getAccount);
 Router.get("/my-tours", authController.protect, viewController.getMyTours);
+Router.get("/my-reviews", authController.protect, viewController.getMyReviews);
 
 Router.post(
   "/submit-user-data",

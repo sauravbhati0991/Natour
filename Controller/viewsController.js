@@ -1,6 +1,7 @@
 const Tour = require("./../Models/tourModel");
 const User = require("./../Models/userModel");
 const Booking = require("./../Models/bookingModel");
+const Review = require("./../Models/reviewModel");
 const catchAsync = require("./../Utilities/catchAsync");
 const AppError = require("./../Utilities/appErrors");
 
@@ -23,7 +24,22 @@ exports.getTour = catchAsync(async (req, res, next) => {
   }
 
   res.status(200).render("tour", {
-    title: `${tour.name} tour`,
+    title: `${tour.name} Tour`,
+    tour,
+  });
+});
+exports.getBookedTour = catchAsync(async (req, res, next) => {
+  const tour = await Tour.findOne({ slug: req.params.slug }).populate({
+    path: "reviews",
+    fileds: "review rating user",
+  });
+
+  if (!tour) {
+    return next(new AppError("There is no tour with that name", 404));
+  }
+
+  res.status(200).render("bookedTour", {
+    title: `${tour.name} Tour`,
     tour,
   });
 });
@@ -52,9 +68,17 @@ exports.getMyTours = catchAsync(async (req, res, next) => {
   const tourIds = bookings.map((el) => el.tour);
   const tours = await Tour.find({ _id: { $in: tourIds } });
 
-  res.status(200).render("overview", {
+  res.status(200).render("bookedOverview", {
     title: "My Tours",
     tours,
+  });
+});
+
+exports.getMyReviews = catchAsync(async (req, res, next) => {
+  const reviews = await Review.find({ user: req.user.id });
+  res.status(200).render("myReviews", {
+    title: "My Reviews",
+    reviews,
   });
 });
 
