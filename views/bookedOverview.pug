@@ -13,6 +13,8 @@ block  content
                             span= tour.name
 
                     .card__details
+                        svg.favorite_tour(data-tour-id=`${tour.id}`, data-user-id=`${user.id}`, data-user=`[${user.likeTour.map(id => `'${id}'`).join(',')}]`)
+                            use(xlink:href="/img/icons.svg#icon-heart")
                         h4.card__sub-heading= `${tour.difficulty} ${tour.duration}-day tour`
                         p.card__text= tour.summary 
                         .card__data

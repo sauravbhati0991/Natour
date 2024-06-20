@@ -22,6 +22,7 @@ Router.get("/signup", authController.isloggedIn, viewController.getSignupForm);
 Router.get("/me", authController.protect, viewController.getAccount);
 Router.get("/my-tours", authController.protect, viewController.getMyTours);
 Router.get("/my-reviews", authController.protect, viewController.getMyReviews);
+Router.get("/favorites", authController.protect, viewController.getMyFavorites);
 
 Router.post(
   "/submit-user-data",

@@ -1133,6 +1133,7 @@ body {
   grid-row-gap: 1.75rem;
   grid-column-gap: 2rem;
   padding: 2.5rem 3rem;
+  position: relative;
 }
 .card__sub-heading {
   font-size: 1.2rem;
@@ -1371,4 +1372,20 @@ body {
   width: 200px;
   height: 100px;
   padding: 10px;
+}
+.favorite_tour {
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  top: 10px;
+  right: 30px;
+  cursor: pointer;
+  transition: all ease-in-out 0.2s;
+  transform: translateX(50%);
+  padding: 3px;
+  border-radius: 50%;
+}
+.favorite_tour:hover {
+  width: 30px;
+  height: 30px;
 }

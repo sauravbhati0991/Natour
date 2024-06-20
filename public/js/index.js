@@ -3,6 +3,8 @@ import { login, logout, singUp } from "./LinLoutSup";
 import { updateSettings } from "./updateSettings";
 import { bookTour } from "./stripe";
 import { newReview, deleteReview, updateReview } from "./reviewCRUD";
+import axios from "axios";
+import { showAlert } from "./alert";
 
 const loginForm = document.querySelector(".form--login");
 const signupForm = document.querySelector(".form--signup");
@@ -15,11 +17,66 @@ const ratingInput = document.querySelector(".rating-input");
 const valueDisplay = document.querySelector("#valueDisplay");
 const reviewUpdate = document.querySelectorAll("#review__update");
 const reviewDelete = document.querySelectorAll("#review__delete");
+const likeTour = document.querySelectorAll(".favorite_tour");
 
-if (ratingInput)
+if (likeTour) {
+  likeTour.forEach((e) => {
+    likeTour.forEach((e) => {
+      const { tourId, user } = e.dataset;
+      if (!user.includes(tourId)) {
+        e.style.fill = "#55c57a";
+        e.style.backgroundColor = "white";
+      } else if (user.includes(tourId)) {
+        e.style.fill = "white";
+        e.style.backgroundColor = "#55c57a";
+      }
+    });
+    e.addEventListener("click", async (e) => {
+      const { tourId, userId, user } = e.target.dataset;
+      if (!user.includes(tourId)) {
+        try {
+          await axios({
+            method: "PATCH",
+            url: "/api/v1/Users/like-tour",
+            data: {
+              tourId,
+              userId,
+            },
+          });
+          e.target.style.fill = "white";
+          e.target.style.backgroundColor = "#55c57a";
+          showAlert("success", "Tour added to favorites");
+          location.reload();
+        } catch (err) {
+          console.log(err);
+        }
+      } else if (user.includes(tourId)) {
+        try {
+          await axios({
+            method: "PATCH",
+            url: "/api/v1/Users/un-like-tour",
+            data: {
+              tourId,
+              userId,
+            },
+          });
+          e.target.style.fill = "#55c57a";
+          e.target.style.backgroundColor = "white";
+          showAlert("success", "Tour removed from favorites.");
+          location.reload();
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    });
+  });
+}
+
+if (ratingInput) {
   ratingInput.addEventListener("input", () => {
     valueDisplay.textContent = ratingInput.value;
   });
+}
 
 if (loginForm) {
   loginForm.addEventListener("submit", (e) => {
@@ -77,14 +134,15 @@ if (userPasswordForm) {
   });
 }
 
-if (bookBtn)
+if (bookBtn) {
   bookBtn.addEventListener("click", (e) => {
     e.target.textContent = "Processing...";
     const { tourId } = e.target.dataset; // const tourId = e.target.dataset.touId
     bookTour(tourId);
   });
+}
 
-if (bookReviewBtn)
+if (bookReviewBtn) {
   bookReviewBtn.addEventListener("click", (e) => {
     e.target.innerText = "Adding...";
     e.target.disabled = true;
@@ -94,8 +152,9 @@ if (bookReviewBtn)
     newReview(e, userId, tourId, reviewText, ratingInput);
     document.getElementById("review-input").value = "";
   });
+}
 
-if (reviewUpdate)
+if (reviewUpdate) {
   reviewUpdate.forEach((button) => {
     button.addEventListener("click", (e) => {
       const { reviewId } = e.target.dataset;
@@ -106,8 +165,9 @@ if (reviewUpdate)
       updateReview(reviewId, reviewsText);
     });
   });
+}
 
-if (reviewDelete)
+if (reviewDelete) {
   reviewDelete.forEach((button) => {
     button.addEventListener("click", (e) => {
       e.target.innerText = "Deleting...";
@@ -116,3 +176,4 @@ if (reviewDelete)
       deleteReview(reviewId);
     });
   });
+}

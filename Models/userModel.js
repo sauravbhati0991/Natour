@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
+const { type } = require("os");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -53,6 +54,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     select: false,
   },
+  likeTour: [String],
 });
 
 userSchema.pre("save", async function (next) {

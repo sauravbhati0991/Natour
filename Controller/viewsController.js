@@ -28,6 +28,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
     tour,
   });
 });
+
 exports.getBookedTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findOne({ slug: req.params.slug }).populate({
     path: "reviews",
@@ -61,6 +62,7 @@ exports.getAccount = (req, res) => {
     title: "Your account",
   });
 };
+
 exports.getMyTours = catchAsync(async (req, res, next) => {
   // find all bookings
   const bookings = await Booking.find({ user: req.user.id });
@@ -78,6 +80,14 @@ exports.getMyReviews = catchAsync(async (req, res, next) => {
   res.status(200).render("myReviews", {
     title: "My Reviews",
     reviews,
+  });
+});
+
+exports.getMyFavorites = catchAsync(async (req, res, next) => {
+  const tours = await Tour.find({ _id: { $in: req.user.likeTour } });
+  res.status(200).render("favorites", {
+    title: "Favorites",
+    tours,
   });
 });
 

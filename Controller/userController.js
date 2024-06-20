@@ -86,6 +86,32 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.likeTour = catchAsync(async (req, res, next) => {
+  const { tourId, userId } = req.body;
+  await User.findByIdAndUpdate(
+    userId,
+    { $addToSet: { likeTour: tourId } },
+    { new: true, useFindAndModify: false }
+  );
+  res.status(200).json({
+    status: "success",
+    message: "Tour is added to favorites.",
+  });
+});
+
+exports.unLikeTour = catchAsync(async (req, res, next) => {
+  const { tourId, userId } = req.body;
+  await User.findByIdAndUpdate(
+    userId,
+    { $pull: { likeTour: tourId } },
+    { new: true, useFindAndModify: false }
+  );
+  res.status(200).json({
+    status: "success",
+    message: "Tour is added to favorites.",
+  });
+});
+
 // NO NEED as we have singup function
 exports.createUser = (req, res) => {
   res.status(500).json({

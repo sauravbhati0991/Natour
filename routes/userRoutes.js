@@ -21,6 +21,8 @@ Router.patch(
   userController.updateMe
 );
 Router.delete("/deleteMe", userController.deleteMe);
+Router.patch("/like-tour", userController.likeTour);
+Router.patch("/un-like-tour", userController.unLikeTour);
 
 Router.use(authController.restrictTo('admin", "lead-guide'));
 
