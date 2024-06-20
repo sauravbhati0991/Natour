@@ -19,10 +19,10 @@ block content
         .user-view
             nav.user-view__menu
                 ul.side-nav
-                    +navitem('#', 'Settings', 'settings', true)
+                    +navitem('/me', 'Settings', 'settings', true)
                     +navitem('/my-tours', 'My bookings', 'briefcase')
                     +navitem('/my-reviews', 'My reviews', 'star')
-                    +navitem('#', 'Billing', 'credit-card')
+                    +navitem('#', 'Favorites', 'heart')
 
                 - if (user.role == 'admin')
                     .admin-nav

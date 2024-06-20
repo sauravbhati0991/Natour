@@ -12,25 +12,77 @@ const signToken = (id) => {
   });
 };
 
-const createSendToken = (user, statusCode, res) => {
-  const token = signToken(user._id);
-  const cookieOptions = {
+const signRefreshToken = (id) => {
+  return crypto.randomBytes(64).toString("hex");
+};
+
+const createAccessAndRefershToken = async (user, statusCode, res) => {
+  const accessToken = signToken(user._id);
+  const refreshToken = signRefreshToken(user._id);
+
+  user.refreshToken = refreshToken;
+  await user.save({ validateBeforeSave: false });
+
+  const cookieAccessOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     secure: true,
     httpOnly: true,
   };
-  res.cookie("jwt", token, cookieOptions);
+  res.cookie("jwt", accessToken, cookieAccessOptions);
+  res.cookie("refreshJwt", refreshToken, {
+    ...cookieAccessOptions,
+    httpOnly: true,
+    path: "/api/v1/Users/refresh-token",
+  });
   user.password = undefined;
   res.status(statusCode).json({
     status: "Success",
-    token,
+    accessToken,
+    refreshToken,
     data: {
       user,
     },
   });
 };
+
+// const createSendToken = (user, statusCode, res) => {
+//   const token = signToken(user._id);
+//   const cookieOptions = {
+//     expires: new Date(
+//       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+//     ),
+//     secure: true,
+//     httpOnly: true,
+//   };
+//   res.cookie("jwt", token, cookieOptions);
+//   user.password = undefined;
+//   // return token;
+//   res.status(statusCode).json({
+//     status: "Success",
+//     token,
+//     data: {
+//       user,
+//     },
+//   });
+// };
+
+exports.login = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // check if email and password exists
+  if (!email || !password) {
+    return next(new AppError("Please provide eamil or password", 400));
+  }
+
+  // Check if user exists and password is correct
+  const user = await User.findOne({ email }).select("+password");
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError("Incorrect email or password", 401));
+  }
+  createAccessAndRefershToken(user, 200, res);
+});
 
 exports.signup = catchAsync(async (req, res, next) => {
   const { email, password, passwordConfirm } = req.body;
@@ -48,27 +100,18 @@ exports.signup = catchAsync(async (req, res, next) => {
     url = `${req.protocol}://${req.get("host")}/me`;
     console.log(url);
     await new Email(newUser, url).sendWelcome();
-    createSendToken(newUser, 201, res);
+    newUser.password = undefined;
+    const Token = createSendToken(newUser, 200, res);
+    const RefreshToken = createRefreshToken(newUser, 200, res);
+    res.status(200).json({
+      status: "success",
+      Token,
+      RefreshToken,
+      data: {
+        newUser,
+      },
+    });
   } else next(new AppError("Email already exists.", 400));
-});
-
-exports.login = catchAsync(async (req, res, next) => {
-  //   const email = req.body.email;
-  //   const password = req.body.password;
-  ////////////OR//////////////
-  const { email, password } = req.body;
-
-  // check if email and password exists
-  if (!email || !password) {
-    return next(new AppError("Please provide eamil or password", 400));
-  }
-
-  // Check if user exists and password is correct
-  const user = await User.findOne({ email }).select("+password");
-  if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError("Incorrect email or password", 401));
-  }
-  createSendToken(user, 200, res);
 });
 
 exports.logout = (req, res) => {
@@ -245,4 +288,36 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // User.findByInAndUpdate will not work as intended
   // log user in, send jwt
   createSendToken(user, 200, res);
+});
+
+exports.refreshToken = catchAsync(async (req, res, next) => {
+  const { refreshToken } = req.cookie || req.body;
+  if (!refreshToken)
+    return next(new AppError("No refresh token proviede.", 401));
+
+  const user = await User.findOne({ refreshToken });
+  if (!user) return next(new AppError("Invalid Refresh Token.", 401));
+
+  const newAccessToken = signToken(user._id);
+  const newRefreshToken = signRefreshToken(user._id);
+  await user.save({ validateBeforeSave: false });
+
+  const cookieAccessOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    secure: true,
+    httpOnly: true,
+  };
+  res.cookie("jwt", newAccessToken, cookieAccessOptions);
+  res.cookie("refreshJwt", newRefreshToken, {
+    ...cookieAccessOptions,
+    httpOnly: true,
+    path: "/api/v1/Users/refresh-token",
+  });
+  res.status(200).json({
+    status: "Success",
+    token: newToken,
+    refreshToken: newRefreshToken,
+  });
 });
